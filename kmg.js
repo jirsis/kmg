@@ -36,7 +36,7 @@ Module.register("kmg", {
     updateKmg: function(){
         var self = this;
         var urlLogin = this.config.apiBase + this.config.loginGuest;
-        urlLogin = "http://localhost:8080/modules/JIR-kmg/example.json";
+        urlLogin = "http://localhost:8080/modules/kmg/example.json";
         
         this.agendaInfo = [];
         
@@ -47,7 +47,6 @@ Module.register("kmg", {
         kmgLoginRequest.open("GET", urlLogin, true);
         kmgLoginRequest.onreadystatechange = function() {
             if (this.readyState === 4) {
-                Log.info("-> "+this.response);
                 var kmgResponse = JSON.parse(this.response);
                 self.processKmgAgendaInformation(kmgResponse);
                 self.scheduleUpdate(self.config.updateInterval);
@@ -81,9 +80,106 @@ Module.register("kmg", {
         }
         var table = document.createElement("table");
         table.className = "small";
-        table.innerHTML = "<table><tr><td colspan='3'>LOGO</td></tr><tr><td colspan='3'>agenda.today</td></tr><tr><td colspan='3'>date</td></tr><tr><td>*</td><td>menu.brunch</td><td>entry.brunch</td></tr><tr><td>*</td><td>menu.first_course</td><td>entry.first_course</td></tr><tr><td></td><td>menu.second_course</td><td>entry.second_course</td></tr><tr><td></td><td>menu.dessert</td><td>entry.dessert</td></tr><tr><td>*</td><td>menu.snack</td><td>entry.snack</td></tr><tr><td>ZZ</td><td>naps[0].start_hours +':' + naps[0].start_minutes +' - ' + naps[0].finish_hours +':' + naps[0].finish_minutes</td><td>naps[0].quality</td></tr><tr><td>Baño</td><td>diaper_urination + '/' + diaper_depositions + ' - wc_urination + '/' + wc_depositions</td><td></td></tr><tr><td colspan='3'>entry.note</td></tr></table>";
+    
+        this.fillLogoRow(table, this.agendaInfo);
+        this.fillDateRow(table, this.agendaInfo.date);
+        this.fillCourse(table, 'brunch', '**');
+        this.fillLunchRow(table);
+        this.fillCourse(table, 'snack', '**');
+        this.fillNaps(table);
+        this.fillWC(table);
+        this.fillTeacherNote(table);
+
         return table;
     },
+
+    fillLogoRow: function(table, agenda){
+        var row = document.createElement("tr");
+        var cell = document.createElement('td');
+        cell.colSpan = 3;
+        cell.className = 'bright line ';
+        cell.innerHTML = "LOGO";
+        row.appendChild(cell);
+        table.appendChild(row);
+    },
+
+    fillDateRow: function(table, date){
+        var row = document.createElement("tr");
+        var cell = document.createElement('td');
+        cell.colSpan = 3;
+        cell.innerHTML = date;
+        row.appendChild(cell);
+        table.appendChild(row);
+    },
+
+    fillLunchRow: function(table){
+        this.fillCourse(table, 'first_course', '**');
+        this.fillCourse(table, 'second_course', '');
+        this.fillCourse(table, 'dessert', '');
+    },
+
+    fillCourse: function(table, course, icon){
+        var courseRow = document.createElement("tr");
+        courseRow.className = 'bright line ';
+        this.fillFoodCell(courseRow, icon);
+        this.fillFoodCell(courseRow, 'menu.'+course);
+        this.fillFoodCell(courseRow, 'entry.'+course);  
+        table.appendChild(courseRow);
+    },
+
+    fillFoodCell: function(row, foodData){
+        var cell = document.createElement('td');
+        cell.innerHTML = foodData;
+        row.appendChild(cell);
+    },
+
+    fillNaps: function(table){
+        var row = document.createElement('tr');
+
+        var icon = document.createElement('td');
+        icon.innerHTML = 'ZZ';
+        row.appendChild(icon);
+
+        var nap = document.createElement('td');
+        nap.innerHTML = 'naps[0].start_hours :naps[0].start_minutes - naps[0].finish_hours : naps[0].finish_minutes';
+        row.appendChild(nap);
+
+        var napStatus = document.createElement('td');
+        nap.innerHTML = ':)';
+        row.appendChild(napStatus);
+
+        table.appendChild(row);
+    },
+
+    fillWC: function(table){
+        var row = document.createElement('tr');
+
+        var icon = document.createElement('td');
+        icon.innerHTML='P';
+
+        var diaper = document.createElement('td');
+        diaper.innerHTML = 'entry.diaper_urination / entry.diaper_deposition';
+
+        var wc = document.createElement('td');
+        wc.innerHTML = 'entry.wc_urination / entry.wc_deposition';
+
+        row.appendChild(icon);
+        row.appendChild(diaper);
+        row.appendChild(wc);
+
+        table.appendChild(row);
+    },
+
+    fillTeacherNote: function(table){
+        var row = document.createElement('tr');
+        var note = document.createElement('td');
+        note.colSpan=3;
+        note.innerHTML='entry.note';
+
+        row.appendChild(note);
+        table.appendChild(row);
+    },
+
 
     // printRow: function(table, bus){
     //     var row = document.createElement("tr");
@@ -195,7 +291,7 @@ Module.register("kmg", {
     },
 
     socketNotificationReceived: function (notification, payload) {
-        if (notification === "BUS_STOP_EVENTS") {
+        if (notification === "KMG_STOP_EVENTS") {
             Log.log(payload);
         }    
         this.updateDom(this.config.animationSpeed);
