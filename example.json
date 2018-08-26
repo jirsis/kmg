@@ -1,0 +1,35 @@
+{
+    "date": "2018-08-24",
+    "menu": {
+      "brunch": "desayuno",
+      "first_course": "primer plato",
+      "second_course": "segundo plato",
+      "dessert": "postre",
+      "snack": "Snack title"
+    },
+    "agenda": {
+      "today": "Título del día!"
+    },
+    "entry": {
+      "brunch": 2,
+      "first_course": 2,
+      "second_course": 2,
+      "dessert": 2,
+      "snack": -1,
+      "nap": 2,
+      "naps": [
+        {
+          "finish_hours": 14,
+          "start_hours": 13,
+          "quality": 2,
+          "finish_minutes": 50,
+          "start_minutes": 10
+        }
+      ],
+      "diaper_urination": 3,
+      "diaper_depositions": 1,
+      "wc_urination": 0,
+      "wc_depositions": 0,
+      "note": "Nota resumen del día actual"
+    }
+}
