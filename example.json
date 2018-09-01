@@ -1,14 +1,14 @@
 {
     "date": "2018-08-24",
     "menu": {
-      "brunch": "desayuno",
-      "first_course": "primer plato",
-      "second_course": "segundo plato",
-      "dessert": "postre",
-      "snack": "Snack title"
+      "brunch": "Leche, cereal",
+      "first_course": "Alubias blancas estofadas",
+      "second_course": "Revuelto de york",
+      "dessert": "Yogurt",
+      "snack": "Fruta, zumo"
     },
     "agenda": {
-      "today": "Título del día!"
+      "today": "Sensory activity"
     },
     "entry": {
       "brunch": 2,
@@ -30,6 +30,6 @@
       "diaper_depositions": 1,
       "wc_urination": 0,
       "wc_depositions": 0,
-      "note": "Nota resumen del día actual"
+      "note": "Menuda caca esta mañana...el resto genial!!!"
     }
 }
