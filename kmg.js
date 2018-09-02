@@ -131,7 +131,7 @@ Module.register("kmg", {
         td.appendChild(extraSpace);
 
         var date = document.createElement('span');
-        date.innerHTML = agendaInfo.date;
+        date.innerHTML = moment(agendaInfo.date).format('DD MMM YYYY');
         td.appendChild(date);
 
         row.appendChild(td);
