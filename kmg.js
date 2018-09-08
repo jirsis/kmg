@@ -39,6 +39,7 @@ Module.register('kmg', {
 
     start: function(){
         Log.log('Starting module: ' + this.name);
+        this.socketNotificationReceived('KMG_STARTED', this.config);
         this.scheduleUpdate(this.config.initialLoadDelay);
         this.loaded = false;
     },
@@ -323,7 +324,7 @@ Module.register('kmg', {
 		}
 		var self = this;
 		setTimeout(function() {
-            //self.sendSocketNotification('KMG_SET_CONFIG', self.config);
+            self.sendSocketNotification('KMG_SET_CONFIG', self.config);
 			self.updateKmg();
 		}, nextLoad);
 	},
@@ -334,8 +335,9 @@ Module.register('kmg', {
     },
 
     socketNotificationReceived: function (notification, payload) {
+        Log.info('notification recived '+notifiaction);
         if (notification === 'KMG_UPDATE_CONFIG') {
-            Log.log(payload);
+            Log.info(payload);
             this.updateDom(this.config.animationSpeed);
         }    
     },

@@ -1,0 +1,32 @@
+{
+  "name": "kmg",
+  "version": "0.1.0",
+  "description": "MagicMirror module that show schooltivity.com/ kindergarden information",
+  "main": "kmg.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jirsis/kmg.git"
+  },
+  "keywords": [
+    "MagicMirror2",
+    "module",
+    "kmg",
+    "kindergarden"
+  ],
+  "author": "J. Ignacio Reta Sabarrós",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jirsis/kmg/issues"
+  },
+  "homepage": "https://github.com/jirsis/kmg#readme",
+  "dependencies": {
+    "request-debug": "^0.2.0",
+    "request-promise": "^4.2.2"
+  }
+}

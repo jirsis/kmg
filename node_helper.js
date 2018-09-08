@@ -1,28 +1,33 @@
 var NodeHelper = require("node_helper");
-var logger = require('./lib/logger');
 //var request = require('request');
 var request = require('request-promise');
 
-var login = function(body){
-    console.log(body);
-};
-
-
 module.exports = NodeHelper.create({
     start: function() {
-        logger.log(this.name + ' is started!');
+        console.log(this.name + ' is started!');
+    },
+
+    main: function(token){
+        this.cookies = [];
+        return new Promise((resolve, reject) => {
+            console.log('.. ' + token);
+            resolve({hola: 'saludo '+token});
+        });
+        return {'hello': 'saludo'};
+        // return kmg.loginGuest('bwuPX4VVEsyBH48Y')
+        //     .catch(kmg.students)
+        //     .then(kmg.entries)
+        //     .then(kmg.process)
+        //     .then(kmg.logout);
     },
     
     socketNotificationReceived: function(notification, payload) {
-        logger.log(this.name + ' received a socket notification: ' + notification + ' - Payload: ' + payload);
-
-        request.post({
-          form: {guest_code: payload.guest_token},
-          url: payload.apiBase+payload.loginGuest,
-          jar: true
-        }).then(login);
-
-
-        //this.sendSocketNotification('KMG_UPDATE_CONFIG', {'hello': 'saludo'});
-    },
+        let json = JSON.stringify(payload, null, 2);
+        console.log(this.name + ' received a socket notification: ' + notification + ' - Payload: ' + json);
+        let self = this;
+        this.main(payload.guest_token).then((response) => {
+            console.log('r-> '+ JSON.stringify(response, null, 2));
+            self.sendSocketNotification('KMG_UPDATE_CONFIG', response);
+        });
+    }
 });
