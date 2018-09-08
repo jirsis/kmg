@@ -11,11 +11,11 @@
       "today": "Sensory activity"
     },
     "entry": {
-      "brunch": 2,
-      "first_course": 2,
-      "second_course": 2,
+      "brunch": -1,
+      "first_course": 0,
+      "second_course": 1,
       "dessert": 2,
-      "snack": -1,
+      "snack": 3,
       "nap": 2,
       "naps": [
         {

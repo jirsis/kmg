@@ -5,23 +5,24 @@
  * MIT Licensed.
  */
 
-Module.register("kmg", {
+Module.register('kmg', {
     defaults: {
 
-        guest_token: "",
+        guest_token: '',
 
-        apiBase: "https://kindermygarden.schooltivity.com",
-        loginGuest: "/sign-in/guest/",
-        agendas: "/agendas/",
+        apiBase: 'https://kindermygarden.schooltivity.com',
+        loginGuest: '/sign-in/guest/',
+        parents: '/api/parents/students/',
+        agendas: '/api/agendas/student/{id-student}/entries/',
 
         animationSpeed: 2000,
 
         initialLoadDelay: 2500,
-        updateInterval: 60 * 60 * 1000, //every 1 hour
+        updateInterval: 10 * 1000 * 1000, //every 10 secs
 
     },
 
-    requiresVersion: "2.1.0",
+    requiresVersion: '2.1.0',
 
     getStyles: function() {
 		return [
@@ -37,7 +38,8 @@ Module.register("kmg", {
     },
 
     start: function(){
-        Log.log("Starting module: " + this.name);
+        Log.log('Starting module: ' + this.name);
+        this.socketNotificationReceived('KMG_STARTED', this.config);
         this.scheduleUpdate(this.config.initialLoadDelay);
         this.loaded = false;
     },
@@ -45,7 +47,7 @@ Module.register("kmg", {
     updateKmg: function(){
         var self = this;
         var urlLogin = this.config.apiBase + this.config.loginGuest;
-        urlLogin = "http://localhost:8080/modules/kmg/example.json";
+        urlLogin = 'http://localhost:8080/modules/kmg/example.json';
         
         this.agendaInfo = [];
         
@@ -53,7 +55,7 @@ Module.register("kmg", {
         var kmgQuery = new FormData();
         kmgQuery.append('guest_code', this.config.guest_token);
             
-        kmgLoginRequest.open("GET", urlLogin, true);
+        kmgLoginRequest.open('GET', urlLogin, true);
         kmgLoginRequest.onreadystatechange = function() {
             if (this.readyState === 4) {
                 var kmgResponse = JSON.parse(this.response);
@@ -73,8 +75,8 @@ Module.register("kmg", {
     },
 
     getDom: function() {
-        var wrapper = document.createElement("div");
-        if (this.config.guest_token === "") {
+        var wrapper = document.createElement('div');
+        if (this.config.guest_token === '') {
 			return this.kmgNotConfigurated(wrapper);
 		}
 		if (!this.loaded) {
@@ -82,17 +84,16 @@ Module.register("kmg", {
         }
 
         if(this.error){
-            wrapper.innerHTML = this.name + ": "+this.error;
-            wrapper.className = "dimmed light small";
+            wrapper.innerHTML = this.name + ': '+this.error;
+            wrapper.className = 'dimmed light small';
             this.error = undefined;
 		    return wrapper;
         }
-        var table = document.createElement("table");
-        table.className = "small";
+        var table = document.createElement('table');
+        table.className = 'small';
     
         this.fillLogoRow(table, this.agendaInfo);
         this.fillTodayQuote(table, this.agendaInfo);
-        //frown grin-beam 
         this.fillCourse(table, this.agendaInfo, 'brunch','icon-milk-box');
         this.fillLunchRow(table, this.agendaInfo);
         this.fillCourse(table, this.agendaInfo, 'snack', 'icon-sandwich');
@@ -121,14 +122,6 @@ Module.register("kmg", {
         var td = document.createElement('td');
         td.colSpan = 5;
         td.align = 'center';
-
-        var activity = document.createElement('span');
-        activity.innerHTML = agendaInfo.agenda.today;
-        td.appendChild(activity);
-
-        var extraSpace = document.createElement('span');
-        extraSpace.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-        td.appendChild(extraSpace);
 
         var date = document.createElement('span');
         date.innerHTML = moment(agendaInfo.date).format('DD MMM YYYY');
@@ -178,7 +171,8 @@ Module.register("kmg", {
 
         var span = document.createElement('span');
         span.className = this.mapQuality(foodData);
-        
+
+        cell.appendChild(span);
         cell.appendChild(span);
         row.appendChild(cell);
     },
@@ -219,7 +213,7 @@ Module.register("kmg", {
 
         this.fillPee(td, agenda);
         var extraSpace = document.createElement('span');
-        extraSpace.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+        extraSpace.innerHTML = '&emsp;&bull;&emsp;'
         td.appendChild(extraSpace);
         this.fillPoo(td, agenda);
         
@@ -263,10 +257,30 @@ Module.register("kmg", {
         var row = document.createElement('tr');
         var note = document.createElement('td');
         var p = document.createElement('p');
+        p.style = 'max-width: 300px';
+
         note.colSpan=5;
         note.align = 'center';
 
-        p.innerHTML = agenda.entry.note;
+        if ( agenda.agenda.today ){
+            var title = document.createElement('span');
+            title.className = 'small-caps';
+            title.style = 'font-variant:small-caps';
+            title.innerHTML = agenda.agenda.today;
+            p.appendChild(title);
+        }
+
+        if( agenda.agenda.today && agenda.entry.note ){
+            var dash = document.createElement('span');
+            dash.innerHTML = '&emsp;&mdash;&emsp;';
+            p.appendChild(dash);
+        }
+
+        if ( agenda.entry.note ){
+            var teacherNote = document.createElement('span');
+            teacherNote.innerHTML = agenda.entry.note;
+            p.appendChild(teacherNote);
+        }
 
         note.appendChild(p);
         row.appendChild(note);
@@ -274,53 +288,46 @@ Module.register("kmg", {
     },
 
     mapQuality: function(data){
-        if(data === 2){
-            return 'far fa-laugh-beam';
-        } else if (data === -1){
-            return 'fas fa-times-circle';
-        } else {
-            console.log('entry value -> ' + data);
-            return 'fas fa-question-circle';
+        const mapper = {
+            '-1': 'far fa-times-circle', // no
+            0: 'far fa-frown-open', // poco
+            1: 'far fa-meh', // regular
+            2: 'far fa-laugh-beam', // bien
+            3: 'far fa-grin-tongue-squint', //repitio
+            
+            'undefined': 'fas fa-question-circle'
         }
+        var quality = mapper[data];
+        if (quality === undefined ){
+            Logger.log('entry value -> ' + data);
+            quality = mapper['undefined'];
+        }
+        return quality;
     },
 
     kmgNotConfigurated: function(wrapper){
-        wrapper.innerHTML = "Please set the correct <i>guest token</i> in the config for module: " + this.name + ".";
-		wrapper.className = "dimmed light small";
+        wrapper.innerHTML = 'Please set the correct <i>guest token</i> in the config for module: ' + this.name + '.';
+		wrapper.className = 'dimmed light small';
 		return wrapper;
     },
 
     kmgNotLoaded: function(wrapper){
-        wrapper.innerHTML = this.name + " "+this.translate("LOADING");
-		wrapper.className = "dimmed light small";
+        wrapper.innerHTML = this.name + ' '+this.translate('LOADING');
+		wrapper.className = 'dimmed light small';
 		return wrapper;
     },
 
     scheduleUpdate: function(delay) {
 		var nextLoad = this.config.updateInterval;
-		if (typeof delay !== "undefined" && delay >= 0) {
+		if (typeof delay !== 'undefined' && delay >= 0) {
 			nextLoad = delay;
 		}
 		var self = this;
 		setTimeout(function() {
+            self.sendSocketNotification('KMG_SET_CONFIG', self.config);
 			self.updateKmg();
 		}, nextLoad);
 	},
-
-    processEmtInformation: function(emtData){
-        for (bus of emtData.arrives){
-            Log.info(bus);
-            var busInfo = {};
-            busInfo.line = bus.lineId;
-            busInfo.distance = bus.busDistance;
-            busInfo.eta = bus.busTimeLeft;
-            this.busesInfo.push(busInfo);
-        }
-        
-        this.show(this.config.animationSpeed, {lockString:this.identifier});
-        this.loaded=true;
-        this.updateDom(this.config.animationSpeed);
-    },
 
     showError: function(errorDescription){
         this.error = errorDescription;
@@ -328,9 +335,10 @@ Module.register("kmg", {
     },
 
     socketNotificationReceived: function (notification, payload) {
-        if (notification === "KMG_STOP_EVENTS") {
-            Log.log(payload);
+        Log.info('notification recived '+notifiaction);
+        if (notification === 'KMG_UPDATE_CONFIG') {
+            Log.info(payload);
+            this.updateDom(this.config.animationSpeed);
         }    
-        this.updateDom(this.config.animationSpeed);
     },
 });
