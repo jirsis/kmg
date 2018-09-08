@@ -15,4 +15,12 @@
     padding-left: 15px;
     text-align: left;
   }
+
+.kmg .small-caps span {
+    font-variant: small-caps;
+}
+
+.kmg .fixed p td{
+    max-width: 250px;
+}
   
