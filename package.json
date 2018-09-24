@@ -1,11 +1,8 @@
 {
   "name": "kmg",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "MagicMirror module that show schooltivity.com/ kindergarden information",
   "main": "kmg.js",
-  "directories": {
-    "lib": "lib"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
