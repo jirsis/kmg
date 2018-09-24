@@ -1,5 +1,5 @@
 /* Magic Mirror
- * Module: emt
+ * Module: kmg
  *
  * By Iñaki Reta Sabarrós https://github.com/jirsis
  * MIT Licensed.
