@@ -10,15 +10,10 @@ Module.register('kmg', {
 
         guest_token: '',
 
-        apiBase: 'https://kindermygarden.schooltivity.com',
-        loginGuest: '/sign-in/guest/',
-        parents: '/api/parents/students/',
-        agendas: '/api/agendas/student/{id-student}/entries/',
-
         animationSpeed: 2000,
 
-        initialLoadDelay: 2500,
-        updateInterval: 10 * 1000 * 1000, //every 10 secs
+        initialLoadDelay: 1000,
+        updateInterval: 60*60*1000, //1 check by hour, by default
 
     },
 
@@ -40,11 +35,11 @@ Module.register('kmg', {
     start: function(){
         Log.log('Starting module: ' + this.name);
         this.socketNotificationReceived('KMG_STARTED', this.config);
-        this.scheduleUpdate(this.config.initialLoadDelay);
         this.loaded = false;
     },
 
     updateKmg: function(){
+        Log.info('calling updteKmg()');
         var self = this;
         var urlLogin = this.config.apiBase + this.config.loginGuest;
         urlLogin = 'http://localhost:8080/modules/kmg/example.json';
@@ -335,10 +330,10 @@ Module.register('kmg', {
     },
 
     socketNotificationReceived: function (notification, payload) {
-        Log.info('notification recived '+notifiaction);
-        if (notification === 'KMG_UPDATE_CONFIG') {
-            Log.info(payload);
-            this.updateDom(this.config.animationSpeed);
-        }    
+        if (notification === 'KMG_STARTED'){
+            this.sendSocketNotification(notification, payload);
+        } else if(notification === 'KMG_WAKE_UP'){
+            this.processKmgAgendaInformation(payload);
+        }
     },
 });
