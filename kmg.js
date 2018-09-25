@@ -38,30 +38,6 @@ Module.register('kmg', {
         this.loaded = false;
     },
 
-    updateKmg: function(){
-        Log.info('calling updteKmg()');
-        var self = this;
-        var urlLogin = this.config.apiBase + this.config.loginGuest;
-        urlLogin = 'http://localhost:8080/modules/kmg/example.json';
-        
-        this.agendaInfo = [];
-        
-        var kmgLoginRequest = new XMLHttpRequest();
-        var kmgQuery = new FormData();
-        kmgQuery.append('guest_code', this.config.guest_token);
-            
-        kmgLoginRequest.open('GET', urlLogin, true);
-        kmgLoginRequest.onreadystatechange = function() {
-            if (this.readyState === 4) {
-                var kmgResponse = JSON.parse(this.response);
-                self.processKmgAgendaInformation(kmgResponse);
-                self.scheduleUpdate(self.config.updateInterval);
-            }
-        };
-        // kmgLoginRequest.send(kmgQuery);
-        kmgLoginRequest.send();
-    },
-
     processKmgAgendaInformation: function(agendaData){
         this.agendaInfo = agendaData;
         this.show(this.config.animationSpeed, {lockString:this.identifier});
@@ -186,8 +162,10 @@ Module.register('kmg', {
         var napCell = document.createElement('td');
         napCell.className = 'align-right ';
         napCell.colSpan = 3;
-        napCell.innerHTML = nap.start_hours + ':' + nap.start_minutes+' - '+
-            nap.finish_hours+':'+ nap.finish_minutes;
+        const startMinutes = nap.start_minutes<10? '0'+nap.start_minutes:nap.start_minutes;
+        const endMinutes =  nap.finish_minutes<10? '0'+nap.finish_minutes:nap.finish_minutes;
+        napCell.innerHTML = nap.start_hours + ':' + startMinutes +' - '+
+            nap.finish_hours+':'+ endMinutes;
         row.appendChild(napCell);
 
         var napStatus = document.createElement('td');
@@ -311,18 +289,6 @@ Module.register('kmg', {
 		wrapper.className = 'dimmed light small';
 		return wrapper;
     },
-
-    scheduleUpdate: function(delay) {
-		var nextLoad = this.config.updateInterval;
-		if (typeof delay !== 'undefined' && delay >= 0) {
-			nextLoad = delay;
-		}
-		var self = this;
-		setTimeout(function() {
-            self.sendSocketNotification('KMG_SET_CONFIG', self.config);
-			self.updateKmg();
-		}, nextLoad);
-	},
 
     showError: function(errorDescription){
         this.error = errorDescription;
