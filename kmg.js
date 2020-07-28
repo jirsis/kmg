@@ -14,6 +14,7 @@ Module.register('kmg', {
 
         initialLoadDelay: 1000,
         updateInterval: 60*60*1000, //1 check by hour, by default
+        debug: false,
 
     },
 
@@ -68,7 +69,7 @@ Module.register('kmg', {
         this.fillCourse(table, this.agendaInfo, 'brunch','icon-milk-box');
         this.fillLunchRow(table, this.agendaInfo);
         this.fillCourse(table, this.agendaInfo, 'snack', 'icon-sandwich');
-        this.fillNaps(table, this.agendaInfo.entry.naps[0]);
+        this.fillNaps(table, this.agendaInfo.entry.naps);
         this.fillWC(table, this.agendaInfo);
         this.fillTeacherNote(table, this.agendaInfo);
 
@@ -149,33 +150,36 @@ Module.register('kmg', {
     },
 
     fillNaps: function(table, nap){
-        var row = document.createElement('tr');
+        if(nap.length > 0 ){
+            var row = document.createElement('tr');
 
-        var icon = document.createElement('td');
-        icon.className = ' align-left icon-left';
+            var icon = document.createElement('td');
+            icon.className = ' align-left icon-left';
+            
+            var iconCell = document.createElement('span');
+            iconCell.className = 'icon-zzz';
+            icon.appendChild(iconCell);
+            row.appendChild(icon);
+
+            var napCell = document.createElement('td');
+            napCell.className = 'align-right ';
+            napCell.colSpan = 3;
+            const startMinutes = nap[0].start_minutes<10? '0'+nap[0].start_minutes:nap[0].start_minutes;
+            const endMinutes =  nap[0].finish_minutes<10? '0'+nap[0].finish_minutes:nap[0].finish_minutes;
+            napCell.innerHTML = nap[0].start_hours + ':' + startMinutes +' - '+
+                nap[0].finish_hours+':'+ endMinutes;
+            row.appendChild(napCell);
+
+            var napStatus = document.createElement('td');
+            napStatus.className = 'icon-left';
+            napStatus.colSpan = 1;
+            var span = document.createElement('span');
+            span.className = this.mapQuality(nap.quality);
+            napStatus.appendChild(span);
+            row.appendChild(napStatus);
+            table.appendChild(row);
+        }
         
-        var iconCell = document.createElement('span');
-        iconCell.className = 'icon-zzz';
-        icon.appendChild(iconCell);
-        row.appendChild(icon);
-
-        var napCell = document.createElement('td');
-        napCell.className = 'align-right ';
-        napCell.colSpan = 3;
-        const startMinutes = nap.start_minutes<10? '0'+nap.start_minutes:nap.start_minutes;
-        const endMinutes =  nap.finish_minutes<10? '0'+nap.finish_minutes:nap.finish_minutes;
-        napCell.innerHTML = nap.start_hours + ':' + startMinutes +' - '+
-            nap.finish_hours+':'+ endMinutes;
-        row.appendChild(napCell);
-
-        var napStatus = document.createElement('td');
-        napStatus.className = 'icon-left';
-        napStatus.colSpan = 1;
-        var span = document.createElement('span');
-        span.className = this.mapQuality(nap.quality);
-        napStatus.appendChild(span);
-        row.appendChild(napStatus);
-        table.appendChild(row);
     },
 
     fillWC: function(table, agenda){

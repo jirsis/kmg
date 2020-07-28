@@ -7,10 +7,18 @@ var kmg = {
     cookies: [],
     kmgResponse: {},
     helper: {},
+
+    config: {},
+
+    log: function(msg){
+        if(this.config.debug){
+            console.log(msg);
+        }
+    },
     
     chain: function(token, kmg_helper){
         this.helper = kmg_helper;
-        //console.log('chain started '+token);
+        this.log('chain started '+token);
         this.cookies = [];
         this.kmgResponse = {};
         return this.loginGuest(token)
@@ -24,7 +32,7 @@ var kmg = {
     },
     
     loginGuest: function(guestToken){
-        //console.log('login: '+kmg.baseUrl+'->'+guestToken);
+        this.log('login: '+kmg.baseUrl+'->'+guestToken);
         return request.post(
             { url: kmg.baseUrl+'/sign-in/guest/',
               form: {guest_code: guestToken},
@@ -35,8 +43,9 @@ var kmg = {
     },
 
     students: function(loginResponse){
-        //console.log('students');    
+        kmg.log('students');    
         const cookiesToSet = loginResponse.headers['set-cookie'];
+        
         this.cookies = cookiesToSet
             .filter( (cookie) => { 
                 return cookie.split(';')[0];
@@ -51,11 +60,14 @@ var kmg = {
     },
 
     entries: function(studentsResponse){
-        //console.log('entries');
+        kmg.log('entries');
         const entriesKindergarden = JSON.parse(studentsResponse.body);
         const studentId = entriesKindergarden[0].id;
-        const uri = '/api/agendas/student/{id-student}/entries/'.replace('{id-student}', studentId);
-
+        const classId = entriesKindergarden[0].classroom_id;
+        const uri = '/api/agendas/student/{id-student}/{id-class}/entries/?timetracking=true'
+            .replace('{id-student}', studentId)
+            .replace('{id-class}', classId);
+        kmg.log(uri);
         return request.get({
             uri: kmg.baseUrl + uri,
             resolveWithFullResponse: true,
@@ -66,15 +78,17 @@ var kmg = {
     },
 
     process: function(entriesResponse){
-        //console.log('process');
+        kmg.log('process');
+        
         return new Promise((resolve, reject) => {
-            this.kmgResponse = JSON.parse(entriesResponse.body)[0];
+            this.kmgResponse = JSON.parse(entriesResponse.body).entries[0];
             resolve();
         });
     },
 
     logout: function(){
-        //console.log('logout');
+        kmg.log('logout');
+        kmg.log(this.kmgResponse);
         return request.get({
             uri: kmg.baseUrl + '/logout/',
             resolveWithFullResponse: true,
@@ -92,12 +106,13 @@ module.exports = NodeHelper.create({
     },
 
     updateKindergardenData: function(kmg_config, node_helper){
-        console.log('kmg updated: '+new Date());
+        kmg.config = kmg_config;
+        kmg.log('kmg updated: '+new Date());
         kmg.chain(kmg_config.guest_token, node_helper)
             .then(function(response){
                 node_helper.sendSocketNotification('KMG_WAKE_UP', response);
                 setInterval(function update(){  
-                    console.log('kmg updated: '+new Date());
+                    kmg.log('kmg updated: '+new Date());
                     kmg.chain(kmg_config.guest_token, node_helper)
                     .then(function(response){
                         node_helper.sendSocketNotification('KMG_WAKE_UP', response);  
