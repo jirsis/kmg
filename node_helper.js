@@ -8,12 +8,12 @@ var kmg = {
     kmgResponse: {},
     helper: {},
     
-    chain: function(token, kmg_helper){
+    chain: function(email, password, kmg_helper){
         this.helper = kmg_helper;
         //console.log('chain started '+token);
         this.cookies = [];
         this.kmgResponse = {};
-        return this.loginGuest(token)
+        return this.loginParent(email, password)
             .then(kmg.students)
             .then(kmg.entries)
             .then(kmg.process)
@@ -24,10 +24,21 @@ var kmg = {
     },
     
     loginGuest: function(guestToken){
-        //console.log('login: '+kmg.baseUrl+'->'+guestToken);
+        console.log('login guest: '+kmg.baseUrl+'->'+guestToken);
         return request.post(
             { url: kmg.baseUrl+'/sign-in/guest/',
               form: {guest_code: guestToken},
+              resolveWithFullResponse: true,
+              simple: false
+            }
+        );
+    },
+
+    loginParent: function(email, password){
+        //console.log('login parent: '+kmg.baseUrl+'->'+email);
+        return request.post(
+            { url: kmg.baseUrl+'/sign-in/parent/',
+              form: {email: email, password: password},
               resolveWithFullResponse: true,
               simple: false
             }
@@ -54,7 +65,8 @@ var kmg = {
         //console.log('entries');
         const entriesKindergarden = JSON.parse(studentsResponse.body);
         const studentId = entriesKindergarden[0].id;
-        const uri = '/api/agendas/student/{id-student}/entries/'.replace('{id-student}', studentId);
+        const classroomId = entriesKindergarden[0].classroom_id;
+        const uri = `/api/agendas/student/${studentId}/${classroomId}/entries/`;
 
         return request.get({
             uri: kmg.baseUrl + uri,
@@ -93,12 +105,12 @@ module.exports = NodeHelper.create({
 
     updateKindergardenData: function(kmg_config, node_helper){
         console.log('kmg updated: '+new Date());
-        kmg.chain(kmg_config.guest_token, node_helper)
+        kmg.chain(kmg_config.email, kmg_config.password, node_helper)
             .then(function(response){
                 node_helper.sendSocketNotification('KMG_WAKE_UP', response);
                 setInterval(function update(){  
                     console.log('kmg updated: '+new Date());
-                    kmg.chain(kmg_config.guest_token, node_helper)
+                    kmg.chain(kmg_config.email, kmg_config.password, node_helper)
                     .then(function(response){
                         node_helper.sendSocketNotification('KMG_WAKE_UP', response);  
                     });
