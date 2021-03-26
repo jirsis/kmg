@@ -48,7 +48,7 @@ Module.register('kmg', {
 
     getDom: function() {
         var wrapper = document.createElement('div');
-        if (this.config.guest_token === '') {
+        if (this.config.email === '') {
 			return this.kmgNotConfigurated(wrapper);
 		}
 		if (!this.loaded) {
@@ -174,12 +174,11 @@ Module.register('kmg', {
             napStatus.className = 'icon-left';
             napStatus.colSpan = 1;
             var span = document.createElement('span');
-            span.className = this.mapQuality(nap.quality);
+            span.className = this.mapQuality(nap[0].quality);
             napStatus.appendChild(span);
             row.appendChild(napStatus);
             table.appendChild(row);
         }
-        
     },
 
     fillWC: function(table, agenda){
