@@ -14,6 +14,7 @@ Module.register('kmg', {
 
         initialLoadDelay: 1000,
         updateInterval: 60*60*1000, //1 check by hour, by default
+        debug: false,
 
     },
 
@@ -149,7 +150,7 @@ Module.register('kmg', {
     },
 
     fillNaps: function(table, nap){
-        if(nap.length > 0){
+        if(nap.length > 0 ){
             var row = document.createElement('tr');
 
             var icon = document.createElement('td');
@@ -231,8 +232,12 @@ Module.register('kmg', {
     fillTeacherNote: function(table, agenda){
         var row = document.createElement('tr');
         var note = document.createElement('td');
-        var p = document.createElement('p');
-        p.style = 'max-width: 300px';
+        var containerDiv = document.createElement('div');
+        containerDiv.className = 'container';
+
+        var textDiv = document.createElement('p');
+        textDiv.style = 'max-width: 300px';
+        textDiv.className = 'agenda-note';
 
         note.colSpan=5;
         note.align = 'center';
@@ -242,24 +247,26 @@ Module.register('kmg', {
             title.className = 'small-caps';
             title.style = 'font-variant:small-caps';
             title.innerHTML = agenda.agenda.today;
-            p.appendChild(title);
+            textDiv.appendChild(title);
         }
 
         if( agenda.agenda.today && agenda.entry.note ){
             var dash = document.createElement('span');
             dash.innerHTML = '&emsp;&mdash;&emsp;';
-            p.appendChild(dash);
+            textDiv.appendChild(dash);
         }
 
         if ( agenda.entry.note ){
             var teacherNote = document.createElement('span');
             teacherNote.innerHTML = agenda.entry.note;
-            p.appendChild(teacherNote);
+            textDiv.appendChild(teacherNote);
         }
 
-        note.appendChild(p);
+        containerDiv.appendChild(textDiv);
+        note.appendChild(containerDiv);
         row.appendChild(note);
         table.appendChild(row);
+
     },
 
     mapQuality: function(data){
