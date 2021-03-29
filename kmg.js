@@ -236,7 +236,6 @@ Module.register('kmg', {
         containerDiv.className = 'container';
 
         var textDiv = document.createElement('p');
-        textDiv.style = 'max-width: 300px';
         textDiv.className = 'agenda-note';
 
         note.colSpan=5;
