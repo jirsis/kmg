@@ -27,20 +27,18 @@
 .kmg .container {
   padding:3px;
   width:300px;
+  height:80px;
   overflow:hidden;
 }
 
 .agenda-note{
   display:block;
   position:relative;
-  width:300px;
-  height:80px;
   animation:scroll 20s linear infinite;
-  padding:3px;
 }
 
 /* Make it move */
 @keyframes scroll{
-0% {top:100px;}
-100% {top:-100px;}
+  0% {top:100%;}
+  100% {top:-150%;}
 }
