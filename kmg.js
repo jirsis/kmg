@@ -113,7 +113,13 @@ Module.register('kmg', {
         var courseRow = document.createElement("tr");
         courseRow.className = 'bright ';
         this.fillFoodIcon(courseRow, icon, 1, 'left');
-        this.fillFoodCell(courseRow, agenda['menu'][course], 3, 'right');
+
+        var food = agenda['menu'][course];
+        if(agenda['entry'][course] === -1 ){
+            food = ' ';
+        }
+
+        this.fillFoodCell(courseRow, food, 3, 'right');
         this.fillFoodQuality(courseRow, agenda['entry'][course]);  
         table.appendChild(courseRow);
     },
