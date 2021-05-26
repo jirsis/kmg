@@ -39,6 +39,6 @@
 
 /* Make it move */
 @keyframes scroll{
-  0% {transform: translateY 100%; }
-  100% {transform: translateY -150%;}
+  0% {top:100%;}
+  100% {top:-150%;}
 }
